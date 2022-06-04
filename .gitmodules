@@ -1,0 +1,5 @@
+[submodule "pulga-riot"]
+	path = pulga-riot
+	url = git@github.com:caninos-loucos/pulga-riot.git
+        ignore = dirty
+
