@@ -33,7 +33,7 @@
 #include "tinycrypt/sha256.h"
 #endif
 
-#define ENABLE_DEBUG        0
+#define ENABLE_DEBUG        1
 #include "debug.h"
 
 #define COAP_BUF_SIZE     (256U)
@@ -161,11 +161,15 @@ int _handshake_cmd(int argc, char **argv)
     /* reset state */
     _ctx.state = EDHOC_WAITING;
 
+    DEBUG("[init] create msg1 start\n");
     if ((msg_len = edhoc_create_msg1(&_ctx, corr, _method, _suite, msg, sizeof(msg))) > 0) {
+        DEBUG("[init] create msg1 end\n");
         printf("[initiator]: sending msg1 (%d bytes):\n", (int)msg_len);
         print_bstr(msg, msg_len);
         _build_coap_pkt(&pkt, buf, sizeof(buf), msg, msg_len);
+        DEBUG("[init] send start\n");
         len = _send(&pkt, COAP_BUF_SIZE, &addr, netif, port);
+        DEBUG("[init] send end\n");
     }
     else {
         puts("[initiator]: failed to create msg1");
@@ -179,10 +183,14 @@ int _handshake_cmd(int argc, char **argv)
     printf("[initiator]: received a message (%d bytes):\n", pkt.payload_len);
     print_bstr(pkt.payload, pkt.payload_len);
 
+    DEBUG("[init] create msg3 start\n");
     if ((msg_len = edhoc_create_msg3(&_ctx, pkt.payload, pkt.payload_len, msg, sizeof(msg))) > 0) {
+        DEBUG("[init] create msg3 end\n");
         printf("[initiator]: sending msg3 (%d bytes):\n", (int)msg_len);
         print_bstr(msg, msg_len);
+        DEBUG("[init] send msg3 start\n");
         _build_coap_pkt(&pkt, buf, sizeof(buf), msg, msg_len);
+        DEBUG("[init] send msg3 end\n");
         len = _send(&pkt, COAP_BUF_SIZE, &addr, netif, port);
     }
     else {

@@ -33,7 +33,7 @@
 #include "tinycrypt/sha256.h"
 #endif
 
-#define ENABLE_DEBUG        0
+#define ENABLE_DEBUG        1
 #include "debug.h"
 
 #define COAP_BUF_SIZE     (256U)
@@ -72,12 +72,16 @@ ssize_t _edhoc_handler(coap_pkt_t *pkt, uint8_t *buf, size_t len, void *context)
 
     if (_ctx.state == EDHOC_WAITING) {
         uint8_t msg[COAP_BUF_SIZE];
+        DEBUG("[resp] create msg2 start\n");
         if ((msg_len =
                  edhoc_create_msg2(&_ctx, pkt->payload, pkt->payload_len, msg, sizeof(msg))) >= 0) {
+            DEBUG("[resp] create msg2 end\n");
             printf("[responder]: sending msg2 (%d bytes):\n", (int) msg_len);
             print_bstr(msg, msg_len);
+            DEBUG("[resp] send msg2 start\n");
             msg_len = coap_reply_simple(pkt, COAP_CODE_204, buf, len, COAP_FORMAT_OCTET, msg,
                                         msg_len);
+            DEBUG("[resp] send msg2 end\n");
         }
         else {
             puts("[responder]: failed to create msg2");
@@ -87,8 +91,12 @@ ssize_t _edhoc_handler(coap_pkt_t *pkt, uint8_t *buf, size_t len, void *context)
     }
     else if (_ctx.state == EDHOC_SENT_MESSAGE_2) {
         puts("[responder]: finalize exchange");
+        DEBUG("[resp] create fin start\n");
         edhoc_resp_finalize(&_ctx, pkt->payload, pkt->payload_len, false, NULL, 0);
+        DEBUG("[resp] create fin end\n");
+        DEBUG("[resp] send fin start\n");
         msg_len = coap_reply_simple(pkt, COAP_CODE_204, buf, len, COAP_FORMAT_OCTET, NULL, 0);
+        DEBUG("[resp] send fin end\n");
     }
 
     if (_ctx.state == EDHOC_FINALIZED) {
