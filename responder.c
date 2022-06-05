@@ -58,6 +58,18 @@ static wc_Sha256 _sha_r;
 struct tc_sha256_state_struct _sha_r;
 #endif
 
+/*
+ssize_t _edhoc_handler(coap_pkt_t *pkt, uint8_t *buf, size_t len, void *context)
+{
+    (void)context;
+    (void)pkt;
+    (void)buf;
+    (void)len;
+    puts("[resp] will reboot");
+    return 0;
+}
+*/
+
 ssize_t _edhoc_handler(coap_pkt_t *pkt, uint8_t *buf, size_t len, void *context)
 {
     (void)context;
@@ -86,6 +98,8 @@ ssize_t _edhoc_handler(coap_pkt_t *pkt, uint8_t *buf, size_t len, void *context)
         else {
             puts("[responder]: failed to create msg2");
             coap_reply_simple(pkt, COAP_CODE_404, buf, len, COAP_FORMAT_TEXT, NULL, 0);
+            //xtimer_sleep(10);
+            //pm_reboot();
             return -1;
         }
     }
@@ -101,6 +115,8 @@ ssize_t _edhoc_handler(coap_pkt_t *pkt, uint8_t *buf, size_t len, void *context)
 
     if (_ctx.state == EDHOC_FINALIZED) {
         puts("[responder]: handshake successfully completed");
+        //xtimer_sleep(10);
+        //pm_reboot();
     }
 
     return msg_len;
@@ -110,6 +126,7 @@ ssize_t _edhoc_handler(coap_pkt_t *pkt, uint8_t *buf, size_t len, void *context)
 const coap_resource_t coap_resources[] = {
     COAP_WELL_KNOWN_CORE_DEFAULT_HANDLER,
     { "/.well-known/edhoc", COAP_POST, _edhoc_handler, NULL },
+    //{ "/reboot", COAP_POST, _reboot_handler, NULL },
 };
 
 const unsigned coap_resources_numof = ARRAY_SIZE(coap_resources);

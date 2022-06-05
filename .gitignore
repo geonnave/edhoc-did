@@ -4,4 +4,5 @@ bin/
 cscope*
 .cscope*
 .vscode
+results/
 

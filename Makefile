@@ -1,5 +1,14 @@
 # include ../Makefile.tests_common
-APPLICATION ?= edhoc_did
+ifeq (RPK,$(AUTH))
+CFLAGS += -DAUTH_RPK
+else ifeq (DID,$(AUTH))
+CFLAGS += -DAUTH_DID
+else
+$(error must set AUTH variable)
+endif
+$(info with CFLAGS=$(CFLAGS))
+
+APPLICATION ?= edhoc_did_$(AUTH)
 BOARD ?= native
 RIOTBASE ?= ./pulga-riot
 

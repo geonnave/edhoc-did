@@ -173,10 +173,12 @@ int _handshake_cmd(int argc, char **argv)
     }
     else {
         puts("[initiator]: failed to create msg1");
+        DEBUG("[init] end\n");
         return -1;
     }
     if (len < 0) {
         puts("[initiator]: failed to send msg1");
+        DEBUG("[init] end\n");
         return -1;
     }
 
@@ -188,18 +190,20 @@ int _handshake_cmd(int argc, char **argv)
         DEBUG("[init] create msg3 end\n");
         printf("[initiator]: sending msg3 (%d bytes):\n", (int)msg_len);
         print_bstr(msg, msg_len);
-        DEBUG("[init] send msg3 start\n");
         _build_coap_pkt(&pkt, buf, sizeof(buf), msg, msg_len);
-        DEBUG("[init] send msg3 end\n");
+        DEBUG("[init] send msg3 start\n");
         len = _send(&pkt, COAP_BUF_SIZE, &addr, netif, port);
+        DEBUG("[init] send msg3 end\n");
     }
     else {
         puts("[initiator]: failed to create msg3");
+        DEBUG("[init] end\n");
         return -1;
     }
 
     if (edhoc_init_finalize(&_ctx)) {
         puts("[initiator]: handshake failed");
+        DEBUG("[init] end\n");
         return -1;
     }
 
@@ -209,6 +213,7 @@ int _handshake_cmd(int argc, char **argv)
     print_bstr(_ctx.session.th4, EDHOC_DIGEST_SIZE);
 
     _ctx.state = EDHOC_FINALIZED;
+    DEBUG("[init] end\n");
 
     return 0;
 }
