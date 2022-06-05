@@ -1,38 +1,39 @@
 import os, sys, subprocess, time, pexpect
 
-auths = ["RPK", "DID"]
-dists = [10, 100, 1000]
-sleep_time = 3
-RUNS = 2
+au = sys.argv[1]
+ds = sys.argv[2]
 
-for au in auths:
-    print(f"\n\n\n\n\n\nWill prepare {au}")
-    for i in [0, 1]:
-        input(f"\npress enter to flash {au} device {i}")
-        #os.system(f"make BOARD=pulga PROGRAMMER=openocd AUTH={au} flash")
+assert au in ["RPK", "DID"]
 
-    print(f"\n\nWill run {au}")
-    print("  cmd:  init handshake fe80::a4dd:f143:3055:dc42")
+RUNS = 10
 
-    for ds in dists:
-        input(f"\npress enter for {au} {ds}")
-        res_file = f"results/edhoc-{au}-{ds}.log"
+print(f"\n\n\n\n\n\nWill prepare {au}")
+for i in [0, 1]:
+    if input(f"\nflash {au} device {i}? [y/N] ").lower() == "y":
+        os.system(f"make BOARD=pulga PROGRAMMER=openocd AUTH={au} flash")
 
-        process = pexpect.spawn(f"make BOARD=pulga PORT=/dev/ttyUSB0 AUTH={au} term")
-        process.logfile = open(res_file, "wb")
-        print(f"logfile is {process.logfile}")
-        for i in range(0, RUNS):
-            input(f">>> RUN={i} reboot and handshake - press enter")
-            process.sendline("reboot")
-            time.sleep(1)
-            process.sendline("init handshake fe80::a4dd:f143:3055:dc42")
+print(f"\n\nWill run {au}")
+print("  cmd:  init handshake fe80::a4dd:f143:3055:dc42")
 
-            try:
-                process.expect(r".*\[init\] end")
-            except pexpect.expect.TIMEOUT as e:
-                input("timed out -- MAKE SURE TO manually reboot the device (press enter)")
+input(f"\npress enter for {au} {ds}")
+res_file = f"results/edhoc-{au}-{ds}.log"
 
-            print("\nfinished")
+process = pexpect.spawn(f"make BOARD=pulga PORT=/dev/ttyUSB0 AUTH={au} term")
+process.logfile = open(res_file, "wb")
+input(f"> logfile is {process.logfile}")
+
+for i in range(0, RUNS):
+    input(f">>> RUN={i} reboot and handshake - press enter")
+    process.sendline("reboot")
+    time.sleep(1)
+    process.sendline("init handshake fe80::a4dd:f143:3055:dc42")
+
+    try:
+        process.expect(r".*\[init\] end")
+    except pexpect.expect.TIMEOUT as e:
+        input("timed out -- MAKE SURE TO manually reboot the device (press enter)")
+
+    print("\nfinished")
 
         #os.system(f"make BOARD=pulga PORT=/dev/ttyUSB0 AUTH={au} term | tee -a results/edhoc-{au}-{ds}.log")
 """

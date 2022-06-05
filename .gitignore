@@ -4,5 +4,6 @@ bin/
 cscope*
 .cscope*
 .vscode
-results/
+results*
+.ipynb_checkpoints*
 
